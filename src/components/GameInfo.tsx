@@ -1,3 +1,5 @@
+import '../styles/game-info.css'
+
 type GameInfoProps = {
   currentScore: number;
   bestScore: number;
@@ -5,7 +7,7 @@ type GameInfoProps = {
 
 function GameInfo({ currentScore, bestScore }: GameInfoProps) {
   return (
-    <div>
+    <div className="game-info">
       <div>
         Current Score: {currentScore}
       </div>
