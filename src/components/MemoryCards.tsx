@@ -1,37 +1,47 @@
 import { useEffect, useState } from "react";
-import { pokemonList } from "../types";
+import { Pokemon, pokemonList } from "../data";
+import { capitalizeName } from "../helpers";
+import '../styles/pokemon-list.css';
 
-function MemoryCards() {
-  const [pokemonData, setPokemonData] = useState<{ name: string, spriteUrl: string }[]>([]);
+type Requestdata = { name: Pokemon, spriteUrl: string }[]
+
+function MemoryCards(props: {
+  handleCardClick: (pokemonName: Pokemon) => void;
+}) {
+  const [pokemonData, setPokemonData] = useState<Requestdata>([]);
 
   useEffect(() => {
-    getPokemon();
+    getPokemonData();
   }, [])
 
   return (
-    <div>
+    <div className="pokemon-list">
       {pokemonData.map(pokemon => {
         return (
           <div
             key={pokemon.name}
-            onClick={_event => {
-              console.log(`Clicked on ${pokemon.name}`)
+            onClick={() => {
+              props.handleCardClick(pokemon.name);
+              shuffleList(pokemonData);
             }}
+            className="pokemon"
           >
             <img src={`${pokemon.spriteUrl}`} alt={`Icon of pokemon: ${pokemon.name}`} />
-            <div className="pokemon-name">{pokemon.name}</div>
+            <div className="pokemon-name">
+              {capitalizeName(pokemon.name)}
+            </div>
           </div>
         )
       })}
     </div>
   );
 
-  async function getPokemon() {
+  async function getPokemonData() {
     Promise.all(pokemonList.map(pokemon =>
       fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}/`)
     ))
       .then(async promiseResult => {
-        const requestData = [];
+        const requestData: Requestdata = [];
         for (const pokemonPromise of promiseResult) {
           const data = await pokemonPromise.json();
           requestData.push({
@@ -39,10 +49,14 @@ function MemoryCards() {
             spriteUrl: data.sprites.front_default
           })
         }
-        setPokemonData(requestData);
+        shuffleList(requestData);
       }).catch(error => {
         console.log(error);
       })
+  }
+
+  function shuffleList(data: Requestdata) {
+    setPokemonData([...data].sort(() => Math.random() - 0.5));
   }
 }
 
